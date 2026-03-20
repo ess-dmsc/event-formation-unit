@@ -19,7 +19,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Timepix3 {
+namespace timepix3 {
 
 class Config : public Configurations::Config {
 
@@ -43,4 +43,4 @@ public:
   uint32_t MinEventTimeSpanNS{1};
   uint16_t MaxCoordinateGap{5};
 };
-} // namespace Timepix3
+} // namespace timepix3

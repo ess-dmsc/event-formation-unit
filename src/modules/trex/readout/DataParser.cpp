@@ -13,9 +13,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-namespace Trex {
+namespace trex {
 
-constexpr unsigned int DataHeaderSize{sizeof(ESSReadout::Parser::DataHeader)};
+constexpr unsigned int DataHeaderSize{sizeof(ess_readout::Parser::DataHeader)};
 constexpr unsigned int TREXReadoutSize{sizeof(DataParser::TREXReadout)};
 
 // Assume we start after the PacketHeader
@@ -28,13 +28,13 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   while (BytesLeft) {
     // Parse Data Header
-    if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
+    if (BytesLeft < sizeof(ess_readout::Parser::DataHeader)) {
       XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
       Stats.ErrorDataHeaders++;
       return ParsedReadouts;
     }
 
-    auto DataHdrPtr = (ESSReadout::Parser::DataHeader *)DataPtr;
+    auto DataHdrPtr = (ess_readout::Parser::DataHeader *)DataPtr;
 
     if (BytesLeft < DataHdrPtr->DataLength) {
       XTRACE(DATA, WAR, "Data size mismatch, header says %u got %d",
@@ -85,4 +85,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-} // namespace Trex
+} // namespace trex

@@ -28,7 +28,7 @@ auto ValidConfig = R"(
   }
 )"_json;
 
-using namespace Caen;
+using namespace caen;
 
 class Tbl3HeGeometryTest : public TestBase {
 protected:
@@ -49,10 +49,10 @@ protected:
     }
 
     CaenConfiguration.Tbl3HeConf.TopologyMapPtr.reset(
-        new HashMap2D<Caen::Tbl3HeConfig::Topology>(2));
-    auto topo = std::make_unique<Caen::Tbl3HeConfig::Topology>(0);
+        new HashMap2D<caen::Tbl3HeConfig::Topology>(2));
+    auto topo = std::make_unique<caen::Tbl3HeConfig::Topology>(0);
     CaenConfiguration.Tbl3HeConf.TopologyMapPtr->add(0, 0, topo);
-    topo = std::make_unique<Caen::Tbl3HeConfig::Topology>(1);
+    topo = std::make_unique<caen::Tbl3HeConfig::Topology>(1);
     CaenConfiguration.Tbl3HeConf.TopologyMapPtr->add(1, 0, topo);
   }
   void TearDown() override {}

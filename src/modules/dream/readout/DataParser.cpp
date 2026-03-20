@@ -13,7 +13,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 
 constexpr unsigned int CDTReadoutSize{sizeof(DataParser::CDTReadout)};
 
@@ -27,7 +27,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   while (BytesLeft) {
     // Parse Data Header
-    if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
+    if (BytesLeft < sizeof(ess_readout::Parser::DataHeader)) {
       XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
       Stats.BufferErrors++;
       return ParsedReadouts;
@@ -81,4 +81,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-} // namespace Dream
+} // namespace dream

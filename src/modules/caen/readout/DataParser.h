@@ -11,7 +11,7 @@
 #include <common/readout/ess/Parser.h>
 #include <vector>
 
-namespace Caen {
+namespace caen {
 
 class DataParser {
 public:
@@ -70,4 +70,4 @@ public:
 
   struct Stats Stats;
 };
-} // namespace Caen
+} // namespace caen

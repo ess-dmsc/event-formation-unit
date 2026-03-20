@@ -13,7 +13,7 @@
 #include <dto/TimepixDataTypes.h>
 #include <modules/timepix3/Counters.h>
 
-namespace Timepix3 {
+namespace timepix3 {
 
 // | 8b  |      12b        |     35b   |  4b   |  5b  |
 // | 0x6 | Trigger counter | Timestamp | Stamp | Resv |
@@ -59,9 +59,9 @@ namespace Timepix3 {
 // clang-format on
 
 class DataParser
-    : public Observer::DataEventObservable<timepixReadout::TDCReadout>,
-      public Observer::DataEventObservable<timepixReadout::EVRReadout>,
-      public Observer::DataEventObservable<timepixReadout::PixelReadout> {
+    : public observer::DataEventObservable<timepixReadout::TDCReadout>,
+      public observer::DataEventObservable<timepixReadout::EVRReadout>,
+      public observer::DataEventObservable<timepixReadout::PixelReadout> {
 public:
   const unsigned int MaxReadoutsInPacket{500};
 
@@ -84,4 +84,4 @@ private:
   static constexpr uint8_t TDC2_FALLING_CONST = 11;
 };
 
-} // namespace Timepix3
+} // namespace timepix3

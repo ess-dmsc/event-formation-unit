@@ -13,7 +13,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 constexpr unsigned int CaenReadoutSize{sizeof(DataParser::CaenReadout)};
 
@@ -27,7 +27,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   while (BytesLeft) {
     // Parse Data Header
-    if (BytesLeft < sizeof(ESSReadout::Parser::DataHeader)) {
+    if (BytesLeft < sizeof(ess_readout::Parser::DataHeader)) {
       XTRACE(DATA, WAR, "Not enough data left for header: %u", BytesLeft);
       Stats.DataHeaderSizeErrors++;
       return ParsedReadouts;
@@ -78,4 +78,4 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   return ParsedReadouts;
 }
-} // namespace Caen
+} // namespace caen

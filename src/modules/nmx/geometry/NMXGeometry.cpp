@@ -15,7 +15,7 @@
 
 using namespace vmm3;
 
-namespace Nmx {
+namespace nmx {
 
 bool NMXGeometry::validateReadoutData(const VMM3Parser::VMM3Data &Data) const {
   uint8_t Ring = calcRing(Data.FiberId);
@@ -82,4 +82,4 @@ uint16_t NMXGeometry::coord(uint8_t Channel, uint8_t AsicId, uint16_t Offset,
   return CoordinateValue;
 }
 
-} // namespace Nmx
+} // namespace nmx

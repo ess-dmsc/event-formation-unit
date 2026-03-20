@@ -44,7 +44,7 @@ auto BaseConfigJSON = R"(
   }
 )"_json;
 
-using namespace Caen;
+using namespace caen;
 
 class CaenConfigTest : public TestBase {
 protected:

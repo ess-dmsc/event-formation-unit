@@ -13,7 +13,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 BifrostConfig::BifrostConfig() {}
 
@@ -47,4 +47,4 @@ void BifrostConfig::parseConfig() {
   }
 }
 
-} // namespace Caen
+} // namespace caen

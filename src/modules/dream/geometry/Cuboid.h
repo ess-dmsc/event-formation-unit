@@ -23,7 +23,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_WAR
 
-namespace Dream {
+namespace dream {
 
 class Cuboid : public ESSGeometry, public DreamSubModule {
 private:
@@ -123,4 +123,4 @@ public:
     return CuboidCounters;
   }
 };
-} // namespace Dream
+} // namespace dream

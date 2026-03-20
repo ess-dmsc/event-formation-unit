@@ -11,8 +11,8 @@
 
 int main(int argc, char *argv[]) {
 
-  Caen::ReadoutGenerator LokiGen;
-  uint8_t LokiDataSize = sizeof(Caen::DataParser::CaenReadout);
+  caen::ReadoutGenerator LokiGen;
+  uint8_t LokiDataSize = sizeof(caen::DataParser::CaenReadout);
   LokiGen.setReadoutDataSize(LokiDataSize);
 
   LokiGen.argParse(argc, argv);

@@ -11,7 +11,7 @@
 #include <dream/readout/DataParser.h>
 #include <memory>
 
-using namespace Dream;
+using namespace dream;
 
 class MagicGeometryTest : public TestBase {
 protected:

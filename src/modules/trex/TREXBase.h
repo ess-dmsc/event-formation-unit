@@ -14,7 +14,7 @@
 #include <memory>
 #include <modules/trex/Counters.h>
 
-namespace Trex {
+namespace trex {
 
 class TrexBase : public Detector {
 public:
@@ -29,4 +29,4 @@ protected:
   std::unique_ptr<EV44Serializer> Serializer{nullptr};
 };
 
-} // namespace Trex
+} // namespace trex

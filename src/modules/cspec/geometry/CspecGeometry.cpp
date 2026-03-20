@@ -17,7 +17,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 CspecGeometry::CspecGeometry(Statistics &Stats, const Config &CaenConfiguration)
     : Geometry(Stats, CaenConfiguration.CaenParms.MaxRing,
@@ -62,4 +62,4 @@ uint32_t CspecGeometry::calcPixelImpl(const DataParser::CaenReadout &Data) const
   return pixel;
 }
 
-} // namespace Caen
+} // namespace caen

@@ -8,7 +8,7 @@
 #include <common/testutils/TestBase.h>
 #include <common/testutils/SaveBuffer.h>
 
-using namespace Caen;
+using namespace caen;
 
 std::string NotJsonFile{"deleteme_tbl3he_notjson.json"};
 std::string NotJsonStr = R"(

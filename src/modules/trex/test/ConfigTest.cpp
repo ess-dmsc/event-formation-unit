@@ -84,7 +84,7 @@ auto DuplicateEntry = R"(
 }
 )"_json;
 
-using namespace Trex;
+using namespace trex;
 
 class TrexConfigTest : public TestBase {
 protected:

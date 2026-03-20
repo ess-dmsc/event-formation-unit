@@ -49,7 +49,7 @@ auto SimplePolynomials = R"(
 
 // clang-format on
 
-using namespace Caen;
+using namespace caen;
 
 class CalibrationIITest : public TestBase {
 protected:

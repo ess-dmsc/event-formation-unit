@@ -13,7 +13,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 Config::Config() {}
 
@@ -75,4 +75,4 @@ void Config::parseConfig() {
   }
 }
 
-} // namespace Caen
+} // namespace caen

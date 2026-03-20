@@ -17,7 +17,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Freia {
+namespace freia {
 
 class TBLMBGeometry final : public AmorGeometry {
 public:
@@ -25,4 +25,4 @@ public:
 
 };
 
-} // namespace Freia
+} // namespace freia

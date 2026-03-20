@@ -28,7 +28,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 
 using namespace geometry;
 
@@ -110,4 +110,4 @@ protected:
     return true;
   }
 };
-} // namespace Dream
+} // namespace dream

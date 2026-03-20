@@ -18,7 +18,7 @@
 using namespace vmm3;
 using VMM3Data = VMM3Parser::VMM3Data;
 
-namespace Freia {
+namespace freia {
 
 void ReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -55,6 +55,6 @@ void ReadoutGenerator::generateData() {
   }
 }
 
-} // namespace Freia
+} // namespace freia
 
 // GCOVR_EXCL_STOP

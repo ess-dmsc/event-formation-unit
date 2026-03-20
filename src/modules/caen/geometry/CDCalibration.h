@@ -17,7 +17,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 class CDCalibration {
 public:
@@ -112,4 +112,4 @@ private:
 
   std::string Message; /// Used for throwing exceptions.
 };
-} // namespace Caen
+} // namespace caen

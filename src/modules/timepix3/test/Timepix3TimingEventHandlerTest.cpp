@@ -21,7 +21,7 @@
 #include <timepix3/readout/DataParser.h>
 #include <vector>
 
-using namespace Timepix3;
+using namespace timepix3;
 using namespace timepixDTO;
 using namespace chrono;
 using namespace timepixReadout;

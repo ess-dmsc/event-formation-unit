@@ -24,7 +24,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 
 class DreamMantle : public ESSGeometry, public DreamSubModule {
 private:
@@ -51,4 +51,4 @@ public:
   uint32_t calcPixelId(const Config::ModuleParms &Parms,
                       const DataParser::CDTReadout &Data) const override;
 };
-} // namespace Dream
+} // namespace dream

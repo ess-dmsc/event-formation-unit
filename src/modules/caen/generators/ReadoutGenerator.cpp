@@ -15,7 +15,7 @@
 
 #include <cstdint>
 
-namespace Caen {
+namespace caen {
 
 ReadoutGenerator::ReadoutGenerator() : ReadoutGeneratorBase() {
   // clang-format off
@@ -183,7 +183,7 @@ void ReadoutGenerator::generateData()
   }
 }
 
-void Caen::ReadoutGenerator::testAmplitudes() const {
+void caen::ReadoutGenerator::testAmplitudes() const {
   bool bad = false;
   for (size_t s=0; s<7; ++s) {
     for (size_t p=0; p<512; ++p) {
@@ -257,5 +257,5 @@ DataParser::CaenReadout *ReadoutGenerator::getReadoutDataPtr(size_t Index) {
   return (DataParser::CaenReadout *)&Buffer[HeaderSize + Index * ReadoutDataSize];
 }
 
-} // namespace Dream
+} // namespace dream
 // GCOVR_EXCL_STOP

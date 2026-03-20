@@ -14,7 +14,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 LokiConfig::LokiConfig() {}
 
@@ -98,4 +98,4 @@ void LokiConfig::parseConfig() {
   }
 }
 
-} // namespace Caen
+} // namespace caen

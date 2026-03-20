@@ -18,7 +18,7 @@
 #include <dream/geometry/PADetector.h>
 #include <dream/readout/DataParser.h>
 
-namespace Dream {
+namespace dream {
 
 class MagicGeometry : public Geometry {
 public:
@@ -47,4 +47,4 @@ private:
   PADetector padetector;
   DreamMantle frdetector;
 };
-} // namespace Dream
+} // namespace dream

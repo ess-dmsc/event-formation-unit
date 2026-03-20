@@ -43,7 +43,7 @@ const std::string MalformedJson = R"(
     }
   )";
 
-using namespace Caen;
+using namespace caen;
 
 class BifrostConfigTest : public TestBase {
 protected:

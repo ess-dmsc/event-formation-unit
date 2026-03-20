@@ -18,9 +18,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Timepix3 {
+namespace timepix3 {
 
-using namespace Observer;
+using namespace observer;
 using namespace timepixDTO;
 using namespace timepixReadout;
 
@@ -68,4 +68,4 @@ void Timepix3Instrument::processReadouts() {
 
 Timepix3Instrument::~Timepix3Instrument() {}
 
-} // namespace Timepix3
+} // namespace timepix3

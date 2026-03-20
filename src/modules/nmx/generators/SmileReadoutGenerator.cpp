@@ -18,7 +18,7 @@
 using namespace vmm3;
 using VMM3Data = VMM3Parser::VMM3Data;
 
-namespace Nmx {
+namespace nmx {
 
 void SmileReadoutGenerator::generateData() {
   auto DP = (uint8_t *)Buffer;
@@ -104,6 +104,6 @@ void SmileReadoutGenerator::generateData() {
   }
 }
 
-} // namespace Nmx
+} // namespace nmx
 
 // GCOVR_EXCL_STOP

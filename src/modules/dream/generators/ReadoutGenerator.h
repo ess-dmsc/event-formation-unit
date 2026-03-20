@@ -12,7 +12,7 @@
 #include <dream/readout/DataParser.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-namespace Dream {
+namespace dream {
 
 // Settings local to DREAM data generator
 struct {
@@ -55,5 +55,5 @@ protected:
   /// the detector mask, hence the bool return value
   bool getRandomReadout(DataParser::CDTReadout &DR);
 };
-} // namespace Dream
+} // namespace dream
 // GCOVR_EXCL_STOP

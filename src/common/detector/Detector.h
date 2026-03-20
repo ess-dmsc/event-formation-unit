@@ -195,7 +195,7 @@ public:
   std::unique_ptr<EV44Serializer> Serializer;
 
 protected:
-  ESSReadout::Parser ESSHeaderParser;
+  ess_readout::Parser ESSHeaderParser;
   KafkaConfig KafkaCfg;
 
 private:

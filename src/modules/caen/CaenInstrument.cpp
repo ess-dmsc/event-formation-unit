@@ -15,9 +15,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
-using namespace ESSReadout;
+using namespace ess_readout;
 
 /// \brief load configuration and calibration files, throw exceptions
 /// if these have errors or are inconsistent
@@ -26,7 +26,7 @@ using namespace ESSReadout;
 /// value 0 is mapped to a nonzero value
 CaenInstrument::CaenInstrument(Statistics &Stats, struct CaenCounters &counters,
                                BaseSettings &settings,
-                               ESSReadout::Parser &essHeaderParser)
+                               ess_readout::Parser &essHeaderParser)
     : counters(counters), Settings(settings), ESSHeaderParser(essHeaderParser) {
 
   XTRACE(INIT, ALW, "Loading configuration file %s",
@@ -133,4 +133,4 @@ void CaenInstrument::processReadouts() {
   } // for()
 }
 
-} // namespace Caen
+} // namespace caen

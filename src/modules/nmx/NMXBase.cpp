@@ -22,7 +22,7 @@
 
 using namespace esstime;
 
-namespace Nmx {
+namespace nmx {
 
 const char *classname = "NMX detector with ESS readout";
 
@@ -148,7 +148,7 @@ void NmxBase::processing_thread() {
 
       auto Res = ESSHeaderParser.validate(DataPtr, DataLen, DetectorType::NMX);
 
-      if (Res != ESSReadout::Parser::OK) {
+      if (Res != ess_readout::Parser::OK) {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
                getInputCounters().RxPackets);
@@ -196,4 +196,4 @@ void NmxBase::processing_thread() {
   return;
 }
 
-} // namespace Nmx
+} // namespace nmx

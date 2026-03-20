@@ -106,7 +106,7 @@ public:
 };
 
 TEST_F(TREXBaseTest, Constructor) {
-  Trex::TrexBase Readout(Settings);
+  trex::TrexBase Readout(Settings);
   // Check stats prefix (assumes the prefix is set based on Settings)
   ASSERT_EQ(Readout.getStatPrefix(1), "trex.test.");
   EXPECT_EQ(Readout.getInputCounters().RxPackets, 0);
@@ -114,7 +114,7 @@ TEST_F(TREXBaseTest, Constructor) {
 }
 
 TEST_F(TREXBaseTest, DataReceive) {
-  Trex::TrexBase Readout(Settings);
+  trex::TrexBase Readout(Settings);
 
   writePacketToRxFIFO(Readout, BadTestPacket);
 
@@ -124,7 +124,7 @@ TEST_F(TREXBaseTest, DataReceive) {
 }
 
 TEST_F(TREXBaseTest, DataReceiveBadHeader) {
-  Trex::TrexBase Readout(Settings);
+  trex::TrexBase Readout(Settings);
 
   BadTestPacket[0] = 0xff; // pad should be 0
   writePacketToRxFIFO(Readout, BadTestPacket);

@@ -23,14 +23,14 @@
 #include <readout/DataParser.h>
 #include <tbl3he/geometry/Tbl3HeGeometry.h>
 
-namespace Caen {
+namespace caen {
 
 class CaenInstrument {
 
 private:
   CaenCounters &counters;
   BaseSettings &Settings;
-  ESSReadout::Parser &ESSHeaderParser;
+  ess_readout::Parser &ESSHeaderParser;
   Config CaenConfiguration;
   std::vector<std::shared_ptr<EV44Serializer>> Serializers;
   LokiConfig config;
@@ -41,7 +41,7 @@ public:
   /// loads configuration and calibration files, calculate and generate the
   /// logical geometry and initialise the amplitude to position calculations
   CaenInstrument(Statistics &Stats, CaenCounters &counters,
-                 BaseSettings &settings, ESSReadout::Parser &essHeaderParser);
+                 BaseSettings &settings, ess_readout::Parser &essHeaderParser);
 
   ~CaenInstrument();
 
@@ -60,4 +60,4 @@ public:
   Geometry *Geom;
 };
 
-} // namespace Caen
+} // namespace caen

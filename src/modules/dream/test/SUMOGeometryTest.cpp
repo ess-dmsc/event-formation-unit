@@ -18,7 +18,7 @@
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #pragma GCC diagnostic pop
 
-using namespace Dream;
+using namespace dream;
 
 class DreamGeometryTest : public TestBase {
 protected:

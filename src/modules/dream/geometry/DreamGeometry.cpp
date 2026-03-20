@@ -17,7 +17,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 
 DreamGeometry::DreamGeometry(Statistics &Stats, const Config &Config)
     : Geometry(Stats, Config) {
@@ -128,4 +128,4 @@ int DreamGeometry::getPixelOffset(Config::ModuleType Type) const {
   return RetVal;
 }
 
-} // namespace Dream
+} // namespace dream

@@ -14,7 +14,7 @@
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-namespace Trex {
+namespace trex {
 
 class LETReadoutGenerator : public ReadoutGeneratorBase {
 public:
@@ -26,5 +26,5 @@ protected:
   uint64_t GlobalReadout{0};
 };
 
-} // namespace Trex
+} // namespace trex
 // GCOVR_EXCL_STOP

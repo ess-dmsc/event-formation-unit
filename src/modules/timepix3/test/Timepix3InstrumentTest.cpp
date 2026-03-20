@@ -14,7 +14,7 @@
 #include <memory>
 #include <timepix3/Timepix3Instrument.h>
 
-using namespace Timepix3;
+using namespace timepix3;
 using namespace testing;
 using MockSerializer = NiceMock<EV44SerializerMock>;
 
@@ -91,27 +91,27 @@ TEST_F(Timepix3InstrumentTest, Constructor) {
 }
 
 TEST_F(Timepix3InstrumentTest, BadJsonSettings) {
-  EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
+  EXPECT_ANY_THROW(Timepix3Instrument timepix3(
       counters, Config(BadJsonConfigFile), serializer));
 }
 
 TEST_F(Timepix3InstrumentTest, BadNameSettings) {
-  EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
+  EXPECT_ANY_THROW(Timepix3Instrument timepix3(
       counters, Config(BadNameConfigFile), serializer));
 }
 
 TEST_F(Timepix3InstrumentTest, BadJsonNoDetectorSettings) {
-  EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
+  EXPECT_ANY_THROW(Timepix3Instrument timepix3(
       counters, Config(NoDetectorConfigFile), serializer));
 }
 
 TEST_F(Timepix3InstrumentTest, BadJsonNoXResSettings) {
-  EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
+  EXPECT_ANY_THROW(Timepix3Instrument timepix3(
       counters, Config(NoXResConfigFile), serializer));
 }
 
 TEST_F(Timepix3InstrumentTest, BadJsonNoChunkSettings) {
-  EXPECT_ANY_THROW(Timepix3Instrument Timepix3(
+  EXPECT_ANY_THROW(Timepix3Instrument timepix3(
       counters, Config(BadJsonNoChunkFile), serializer));
 }
 

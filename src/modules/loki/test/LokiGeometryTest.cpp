@@ -13,7 +13,7 @@
 #include <loki/geometry/LokiGeometry.h>
 #include <memory>
 
-using namespace Caen;
+using namespace caen;
 
 class LokiGeometryTest : public TestBase {
 protected:

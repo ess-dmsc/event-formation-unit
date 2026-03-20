@@ -12,7 +12,7 @@
 #include <common/detector/Detector.h>
 #include <freia/Counters.h>
 
-namespace Freia {
+namespace freia {
 
 class FreiaBase : public Detector {
 public:
@@ -26,4 +26,4 @@ public:
   std::string FlatBufferSource{"multiblade"};
 };
 
-} // namespace Freia
+} // namespace freia

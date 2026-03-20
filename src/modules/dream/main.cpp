@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
   MainProg Main("dream", argc, argv);
 
   auto Detector =
-      new Dream::DreamBase<DetectorType::DREAM>(Main.DetectorSettings);
+      new dream::DreamBase<DetectorType::DREAM>(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

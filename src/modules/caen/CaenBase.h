@@ -12,7 +12,7 @@
 #include <common/detector/Detector.h>
 #include <common/types/DetectorType.h>
 
-namespace Caen {
+namespace caen {
 
 class CaenBase : public Detector {
 
@@ -31,4 +31,4 @@ protected:
   std::vector<std::shared_ptr<EV44Serializer>> Serializers;
 };
 
-} // namespace Caen
+} // namespace caen

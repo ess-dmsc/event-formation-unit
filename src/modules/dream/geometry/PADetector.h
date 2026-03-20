@@ -19,7 +19,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Dream {
+namespace dream {
 
 class PADetector : public ESSGeometry {
 private:
@@ -99,4 +99,4 @@ public:
   int getY(uint8_t Wire, uint8_t Strip) const;
 };
 
-} // namespace Dream
+} // namespace dream

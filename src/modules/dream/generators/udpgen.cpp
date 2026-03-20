@@ -14,8 +14,8 @@
 
 int main(int argc, char *argv[]) {
 
-  Dream::ReadoutGenerator DreamGen;
-  uint8_t DreamDataSize = sizeof(Dream::DataParser::CDTReadout);
+  dream::ReadoutGenerator DreamGen;
+  uint8_t DreamDataSize = sizeof(dream::DataParser::CDTReadout);
   DreamGen.setReadoutDataSize(DreamDataSize);
 
   DreamGen.argParse(argc, argv);

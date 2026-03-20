@@ -16,7 +16,7 @@ using VMM3Data = VMM3Parser::VMM3Data;
 
 int main(int argc, char *argv[]) {
 
-  Freia::MultiBladeGenerator Generator;
+  freia::MultiBladeGenerator Generator;
   uint8_t MultiBladeDataSize = sizeof(VMM3Data);
   Generator.setReadoutDataSize(MultiBladeDataSize);
 

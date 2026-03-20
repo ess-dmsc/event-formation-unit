@@ -10,7 +10,7 @@
 #include <common/testutils/TestBase.h>
 #include <timepix3/geometry/Config.h>
 
-using namespace Timepix3;
+using namespace timepix3;
 
 // Test helper class that exposes protected methods for testing
 class TestableConfig : public Config {

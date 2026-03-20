@@ -14,7 +14,7 @@
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-namespace Trex {
+namespace trex {
 
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
@@ -24,6 +24,6 @@ protected:
   void generateData() override;
 };
 
-} // namespace Trex
+} // namespace trex
 
 // GCOVR_EXCL_STOP

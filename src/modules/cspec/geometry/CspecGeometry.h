@@ -20,7 +20,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 class CspecGeometry : public Geometry, ESSGeometry {
 public:
   // Detector geometry constants
@@ -67,4 +67,4 @@ protected:
   uint32_t calcPixelImpl(const DataParser::CaenReadout &Data) const override;
 };
 
-} // namespace Caen
+} // namespace caen

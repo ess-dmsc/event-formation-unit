@@ -26,7 +26,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace PerfGen {
+namespace perf_gen {
 
 const char *classname = "PerfGen Pixel Generator";
 
@@ -99,4 +99,4 @@ void PerfGenBase::processingThread() {
   return;
 }
 
-} // namespace PerfGen
+} // namespace perfGen

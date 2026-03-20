@@ -9,7 +9,7 @@
 #include <nmx/geometry/Config.h>
 #include <nmx/geometry/NMXGeometry.h>
 
-using namespace Nmx;
+using namespace nmx;
 
 class NMXGeometryTest : public TestBase {
 protected:

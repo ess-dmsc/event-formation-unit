@@ -22,7 +22,7 @@ namespace cbm {
 CbmInstrument::CbmInstrument(Statistics &Stats, struct Counters &Counters,
                              Config &Config, Parser &cbmReadoutParser,
                              const HashMap2D<SchemaDetails> &SchemaDetailMap,
-                             ESSReadout::Parser &essHeaderParser)
+                             ess_readout::Parser &essHeaderParser)
     : CbmReadoutParser(cbmReadoutParser), counters(Counters), Conf(Config),
       SchemaMap(SchemaDetailMap), ESSHeaderParser(essHeaderParser),
       CbmGeometry(Stats, Config) {
@@ -32,7 +32,7 @@ CbmInstrument::CbmInstrument(Statistics &Stats, struct Counters &Counters,
 }
 
 void CbmInstrument::processMonitorReadouts() {
-  ESSReadout::ESSReferenceTime &RefTime = ESSHeaderParser.Packet.Time;
+  ess_readout::ESSReferenceTime &RefTime = ESSHeaderParser.Packet.Time;
   // All readouts are now potentially valid, negative TOF is not
   // possible, or 0 ADC values, but rings and fens could still be outside the
   // configured range, also illegal time intervals can be detected here

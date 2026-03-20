@@ -57,7 +57,7 @@ auto ErrorMissingCalibration = R"(
 )"_json;
 // clang-format on
 
-using namespace Caen;
+using namespace caen;
 
 class CDCalibrationTest : public TestBase {
 protected:

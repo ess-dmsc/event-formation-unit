@@ -9,7 +9,7 @@
 #include <freia/geometry/Config.h>
 
 
-using namespace Freia;
+using namespace freia;
 
 
 class FreiaConfigTest : public TestBase {

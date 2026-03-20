@@ -15,7 +15,7 @@
 #include <memory>
 #include <vector>
 
-namespace Observer {
+namespace observer {
 
 /// \brief A template class for observing data events.
 ///
@@ -79,4 +79,4 @@ public:
   }
 };
 
-} // namespace Observer
+} // namespace observer

@@ -170,8 +170,8 @@ protected:
   std::unique_ptr<UDPTransmitter> DataSource{}; ///< Data source
 
 private:
-  ESSReadout::Parser::HeaderVersion headerVersion{
-      ESSReadout::Parser::HeaderVersion::V0}; ///< Header version
+  ess_readout::Parser::HeaderVersion headerVersion{
+      ess_readout::Parser::HeaderVersion::V0}; ///< Header version
 
   ///
   /// \brief Generates the header of the packet.

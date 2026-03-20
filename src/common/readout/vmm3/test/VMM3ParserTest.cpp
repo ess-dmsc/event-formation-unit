@@ -14,7 +14,7 @@
 #include <common/testutils/TestBase.h>
 
 using namespace vmm3;
-using namespace ESSReadout;
+using namespace ess_readout;
 
 class VMM3ParserTest : public TestBase {
 protected:

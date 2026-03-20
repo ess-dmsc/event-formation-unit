@@ -72,7 +72,7 @@ public:
   ~VMM3Parser(){};
 
   //
-  int parse(ESSReadout::Parser::PacketDataV0 &PacketData);
+  int parse(ess_readout::Parser::PacketDataV0 &PacketData);
 
   // To be iterated over in processing thread
   std::vector<struct VMM3Data> Result;

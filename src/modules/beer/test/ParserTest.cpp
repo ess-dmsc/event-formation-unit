@@ -48,7 +48,7 @@ class BeerParserTest : public TestBase {
 protected:
   Parser BeerParser;
   Statistics Stats;
-  ESSReadout::Parser::PacketDataV0 PacketData{Stats};
+  ess_readout::Parser::PacketDataV0 PacketData{Stats};
 
   void SetUp() override {}
   void TearDown() override {}

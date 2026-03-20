@@ -16,7 +16,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Timepix3 {
+namespace timepix3 {
 
 using namespace std;
 using namespace timepixReadout;
@@ -203,4 +203,4 @@ uint64_t PixelEventHandler::calculateGlobalTime(uint16_t toa,
     return lastEpochESSPulseTime->pulseTimeInEpochNs + tofInPixelTime;
   }
 }
-} // namespace Timepix3
+} // namespace timepix3

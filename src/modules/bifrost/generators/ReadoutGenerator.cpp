@@ -64,7 +64,7 @@ void ReadoutGenerator::generateData() {
   struct dat_data_t DatReadout;
   /// \todo: instead setting dataPkt in memory and copying it to the buffer, set
   /// it directly in the buffer
-  struct Caen::DataParser::CaenReadout dataPkt;
+  struct caen::DataParser::CaenReadout dataPkt;
 
   memset(&dataPkt, 0, sizeof(dataPkt));
 

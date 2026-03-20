@@ -13,7 +13,7 @@
 
 #include <vector>
 
-namespace Trex {
+namespace trex {
 
 class DataParser {
 public:
@@ -54,4 +54,4 @@ public:
   struct Counters &Stats;
   uint32_t HeaderCounters[16][16]; // {ring,fen} counters
 };
-} // namespace Trex
+} // namespace trex

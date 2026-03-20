@@ -201,7 +201,7 @@ void CbmBase::processingThread() {
       auto Res = ESSHeaderParser.validate(
           DataPtr, DataLen, CbmConfiguration->Instrument);
 
-      if (Res != ESSReadout::Parser::OK) {
+      if (Res != ess_readout::Parser::OK) {
         XTRACE(DATA, WAR,
                "Error parsing ESS readout header (RxPackets %" PRIu64 ")",
                getInputCounters().RxPackets);

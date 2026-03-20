@@ -12,7 +12,7 @@
 #include <modules/timepix3/handlers/PixelEventHandler.h>
 #include <modules/timepix3/readout/DataParser.h>
 
-using namespace Timepix3;
+using namespace timepix3;
 using namespace timepixDTO;
 using namespace timepixReadout;
 using namespace std;

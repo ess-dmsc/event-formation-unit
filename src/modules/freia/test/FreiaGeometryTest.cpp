@@ -7,7 +7,7 @@
 #include <common/testutils/TestBase.h>
 #include <freia/geometry/FreiaGeometry.h>
 
-using namespace Freia;
+using namespace freia;
 using namespace vmm3;
 
 class FreiaGeometryTest : public TestBase {

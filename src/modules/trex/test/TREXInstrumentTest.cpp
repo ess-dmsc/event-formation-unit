@@ -17,7 +17,7 @@
 #include <string.h>
 #include <trex/TREXInstrument.h>
 
-using namespace Trex;
+using namespace trex;
 using namespace testing;
 using MockSerializer = NiceMock<EV44SerializerMock>;
 
@@ -395,7 +395,7 @@ protected:
   Statistics Stats;
   MockSerializer serializer;
   std::unique_ptr<TREXInstrument> trex;
-  ESSReadout::Parser ESSHeaderParser{Stats};
+  ess_readout::Parser ESSHeaderParser{Stats};
   std::unique_ptr<TestHeaderFactory> headerFactory;
   Event TestEvent;           // used for testing generateEvents()
   std::vector<Event> Events; // used for testing generateEvents()
@@ -408,13 +408,13 @@ protected:
     trex = std::make_unique<TREXInstrument>(counters, Settings, serializer,
                                             ESSHeaderParser);
     ESSHeaderParser.Packet.HeaderPtr =
-        headerFactory->createHeader(ESSReadout::Parser::V0);
+        headerFactory->createHeader(ess_readout::Parser::V0);
   }
   void TearDown() override {}
 
-  void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
+  void makeHeader(ess_readout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = headerFactory->createHeader(ESSReadout::Parser::V0);
+    Packet.HeaderPtr = headerFactory->createHeader(ess_readout::Parser::V0);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(ESSTime(0, 0));

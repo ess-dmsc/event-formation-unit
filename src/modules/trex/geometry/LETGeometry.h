@@ -15,9 +15,9 @@
 #include <common/debug/Trace.h>
 #include <trex/geometry/Geometry.h>
 
-namespace Trex {
+namespace trex {
 
-class LETGeometry : public Trex::Geometry {
+class LETGeometry : public trex::Geometry {
 public:
   bool isWire(uint8_t LocalHybridID) override {
     if (LocalHybridID == 1) {
@@ -42,4 +42,4 @@ protected:
                         uint8_t Channel) override;
 };
 
-} // namespace Trex
+} // namespace trex

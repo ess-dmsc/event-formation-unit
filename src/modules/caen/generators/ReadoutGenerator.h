@@ -12,7 +12,7 @@
 #include <caen/readout/DataParser.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-namespace Caen {
+namespace caen {
 
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
@@ -123,5 +123,5 @@ public:
   /// \return A pointer to the readout data
   DataParser::CaenReadout *getReadoutDataPtr(size_t Index);
 };
-} // namespace Caen
+} // namespace caen
 // GCOVR_EXCL_STOP

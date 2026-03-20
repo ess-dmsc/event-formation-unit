@@ -26,12 +26,12 @@
 using namespace vmm3;
 using namespace geometry;
 
-namespace Nmx {
+namespace nmx {
 
 /// \brief load configuration and calibration files
 NMXInstrument::NMXInstrument(struct Counters &counters, BaseSettings &settings,
                              EV44Serializer &serializer,
-                             ESSReadout::Parser &essHeaderParser,
+                             ess_readout::Parser &essHeaderParser,
                              Statistics &stats)
     : counters(counters), Settings(settings), Stats(stats),
       Serializer(serializer), ESSHeaderParser(essHeaderParser) {
@@ -118,7 +118,7 @@ void NMXInstrument::processReadouts() {
     // VMM3Calibration & Calib = Hybrids[Hybrid].VMMs[Asic];
 
     uint64_t TimeNS =
-        ESSReadout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
+        ess_readout::ESSTime::toNS(readout.TimeHigh, readout.TimeLow).count();
     //   int64_t TDCCorr = Calib.TDCCorr(readout.Channel, readout.TDC);
     //   XTRACE(DATA, DEB, "TimeNS raw %" PRIu64 ", correction %" PRIi64,
     //   TimeNS, TDCCorr);
@@ -188,7 +188,7 @@ void NMXInstrument::checkConfigAndGeometry() {
 
 void NMXInstrument::generateEvents(std::vector<Event> &Events) {
   XTRACE(EVENT, DEB, "generateEvents()");
-  ESSReadout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
+  ess_readout::ESSReferenceTime &TimeRef = ESSHeaderParser.Packet.Time;
   for (const auto &Event : Events) {
     if (Event.empty()) {
       XTRACE(EVENT, DEB, "event empty");
@@ -256,7 +256,7 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
     // Calculate TOF in ns
     auto EventTimeNs = esstime::TimeDurationNano(Event.timeEnd());
 
-    auto TimeOfFlight = TimeRef.getTOF(ESSReadout::ESSTime(EventTimeNs));
+    auto TimeOfFlight = TimeRef.getTOF(ess_readout::ESSTime(EventTimeNs));
 
     if (not TimeOfFlight.has_value()) {
       XTRACE(DATA, WAR, "No valid TOF from PulseTime or PrevPulseTime");
@@ -285,4 +285,4 @@ void NMXInstrument::generateEvents(std::vector<Event> &Events) {
   }
   Events.clear(); // else events will accumulate
 }
-} // namespace Nmx
+} // namespace nmx

@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <dream/geometry/SUMO.h>
 
-namespace Dream {
+namespace dream {
 
 uint8_t SUMO::getCassette(uint8_t Sumo, uint8_t Anode, uint8_t Cathode) const {
   XTRACE(DATA, DEB, "sumo %u, anode %u, cathode %u", Sumo, Anode, Cathode);
@@ -118,4 +118,4 @@ int SUMO::getY(uint8_t Wire, uint8_t Strip) const {
   return getYoffset(Strip) + getLocalYCoord(Wire);
 }
 
-} // namespace Dream
+} // namespace dream

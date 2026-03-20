@@ -15,9 +15,9 @@
 #include <common/debug/Trace.h>
 #include <trex/geometry/Geometry.h>
 
-namespace Trex {
+namespace trex {
 
-class TREXGeometry : public Trex::Geometry {
+class TREXGeometry : public trex::Geometry {
 public:
   ///
   ///\brief determines if a hybrid is for a wire, as opposed to a grid
@@ -90,4 +90,4 @@ protected:
                         uint8_t Channel) override;
 };
 
-} // namespace Trex
+} // namespace trex

@@ -21,7 +21,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-using namespace Freia;
+using namespace freia;
 using namespace vmm3;
 using namespace testing;
 using MockSerializer = NiceMock<EV44SerializerMock>;
@@ -158,7 +158,7 @@ protected:
   struct Counters Counters;
   BaseSettings Settings;
   Statistics Stats;
-  ESSReadout::Parser ESSHeaderParser{Stats};
+  ess_readout::Parser ESSHeaderParser{Stats};
   MockSerializer serializer;
   std::unique_ptr<FreiaInstrument> Freia;
   std::unique_ptr<TestHeaderFactory> HeaderFactory;
@@ -174,13 +174,13 @@ protected:
                                               ESSHeaderParser, Stats,
                                               DetectorType::FREIA);
     ESSHeaderParser.Packet.HeaderPtr =
-        HeaderFactory->createHeader(ESSReadout::Parser::V1);
+        HeaderFactory->createHeader(ess_readout::Parser::V1);
   }
   void TearDown() override {}
 
-  void makeHeader(ESSReadout::Parser::PacketDataV0 &Packet,
+  void makeHeader(ess_readout::Parser::PacketDataV0 &Packet,
                   std::vector<uint8_t> &testdata) {
-    Packet.HeaderPtr = HeaderFactory->createHeader(ESSReadout::Parser::V1);
+    Packet.HeaderPtr = HeaderFactory->createHeader(ess_readout::Parser::V1);
     Packet.DataPtr = (char *)&testdata[0];
     Packet.DataLength = testdata.size();
     Packet.Time.setReference(ESSTime(0, 0));

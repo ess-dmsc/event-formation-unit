@@ -15,7 +15,7 @@
 
 #include <optional>
 
-using namespace Caen;
+using namespace caen;
 using namespace testing;
 
 using MockSerializer = NiceMock<EV44SerializerMock>;
@@ -25,7 +25,7 @@ class CaenInstrumentTest : public TestBase {
 protected:
   struct CaenCounters counters;
   Statistics stats;
-  ESSReadout::Parser parser{stats};
+  ess_readout::Parser parser{stats};
   BaseSettings Settings;
   DataParser::CaenReadout readout;
   std::vector<std::shared_ptr<EV44Serializer>> serializers;
@@ -77,10 +77,10 @@ protected:
       Caen.CaenParser.Result.push_back(lateReadout);
     }
 
-    parser.Packet.Time.setReference(ESSReadout::ESSTime(refHigh, 0));
+    parser.Packet.Time.setReference(ess_readout::ESSTime(refHigh, 0));
     if (prevRefHigh.has_value()) {
       parser.Packet.Time.setPrevReference(
-          ESSReadout::ESSTime(prevRefHigh.value(), 0));
+          ess_readout::ESSTime(prevRefHigh.value(), 0));
     }
     Caen.processReadouts();
   }
@@ -130,7 +130,7 @@ TEST_F(CaenInstrumentTest, BifrostNullCalib) {
   Settings.ConfigFile = BIFROST_CONFIG;
   Settings.CalibFile = "";
   Settings.DetectorName = "bifrost";
-  ASSERT_ANY_THROW(CaenInstrument Caen(stats, counters, Settings, parser));
+  ASSERT_ANY_THROW(CaenInstrument caen(stats, counters, Settings, parser));
 }
 
 TEST_F(CaenInstrumentTest, CspecGoodEvent) {

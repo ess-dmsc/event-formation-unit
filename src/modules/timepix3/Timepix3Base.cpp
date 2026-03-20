@@ -19,7 +19,7 @@
 
 using namespace esstime;
 
-namespace Timepix3 {
+namespace timepix3 {
 
 const char *classname = "Timepix3 detector with ESS readout";
 
@@ -156,4 +156,4 @@ void Timepix3Base::processingThread() {
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;
 }
-} // namespace Timepix3
+} // namespace timepix3

@@ -13,7 +13,7 @@
 #include <common/readout/ess/Parser.h>
 #include <memory>
 
-using namespace ESSReadout;
+using namespace ess_readout;
 
 class TestHeaderFactory {
 

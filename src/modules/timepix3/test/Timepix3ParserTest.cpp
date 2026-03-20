@@ -12,9 +12,9 @@
 #include <modules/timepix3/test/TimepixTestHelper.h>
 #include <timepix3/readout/DataParser.h>
 
-using namespace Timepix3;
+using namespace timepix3;
 using namespace timepixReadout;
-using namespace Observer;
+using namespace observer;
 
 // clang-format off
 std::vector<uint8_t> singlePixelReadoutData{

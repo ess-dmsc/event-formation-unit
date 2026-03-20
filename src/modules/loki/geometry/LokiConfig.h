@@ -15,7 +15,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 class LokiConfig : public Configurations::Config {
  public:
@@ -82,4 +82,4 @@ class LokiConfig : public Configurations::Config {
     struct RingCfg Rings[NumRings];
   } Parms;
 };
-} // namespace Caen
+} // namespace caen

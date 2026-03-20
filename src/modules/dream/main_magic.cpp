@@ -14,7 +14,7 @@
 int main(int argc, char *argv[]) {
   MainProg Main("magic", argc, argv);
 
-  auto Detector = new Dream::DreamBase<DetectorType::MAGIC>(Main.DetectorSettings);
+  auto Detector = new dream::DreamBase<DetectorType::MAGIC>(Main.DetectorSettings);
 
   return Main.run(Detector);
 }

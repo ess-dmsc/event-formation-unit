@@ -20,7 +20,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 class Interval {
 public:
@@ -47,4 +47,4 @@ public:
   // interval endpoints cannot be closer than this.
   static constexpr double EPSILON{0.00001};
 };
-} // namespace Caen
+} // namespace caen

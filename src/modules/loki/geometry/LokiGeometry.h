@@ -25,7 +25,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_ERR
 
-namespace Caen {
+namespace caen {
 
 class LokiGeometry : public Geometry, ESSGeometry {
 public:
@@ -90,4 +90,4 @@ private:
   // clang-format on
 };
 
-} // namespace Caen
+} // namespace caen

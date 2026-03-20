@@ -13,7 +13,7 @@ using namespace vmm3;
 
 int main(int argc, char *argv[]) {
 
-  Trex::ReadoutGenerator TrexGen;
+  trex::ReadoutGenerator TrexGen;
   uint8_t TrexDataSize = sizeof(VMM3Parser::VMM3Data);
   TrexGen.setReadoutDataSize(TrexDataSize);
 

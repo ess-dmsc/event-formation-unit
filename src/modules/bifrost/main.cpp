@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   DetectorType Type = DetectorType::BIFROST;
 
   MainProg Main(Type.toLowerCase(), argc, argv);
-  auto Detector = new Caen::CaenBase(Main.DetectorSettings, Type);
+  auto Detector = new caen::CaenBase(Main.DetectorSettings, Type);
 
   return Main.run(Detector);
 }

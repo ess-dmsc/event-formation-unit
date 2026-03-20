@@ -21,7 +21,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 class MiraclesGeometry : public Geometry, ESSGeometry {
 public:
   explicit MiraclesGeometry(Statistics &Stats, const Config &CaenConfiguration,
@@ -83,4 +83,4 @@ private:
   static constexpr int ESSGEOMETRY_NP{1};   ///< P dimension (pixels)
 };
 
-} // namespace Caen
+} // namespace caen

@@ -22,7 +22,7 @@
 #include <modules/timepix3/Counters.h>
 #include <readout/DataParser.h>
 
-namespace Timepix3 {
+namespace timepix3 {
 
 class Timepix3Instrument {
 public:
@@ -37,7 +37,7 @@ public:
   /// \brief calculate pixel ID from a Timepix3PixelReadout
   uint32_t calcPixel(timepixReadout::PixelReadout &Data);
 
-  Observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp>
+  observer::DataEventObservable<timepixDTO::ESSGlobalTimeStamp>
       epochESSPulseTimeObservable;
 
   /// \brief from the clusters in Clusterer, check if they meet requirements to
@@ -58,4 +58,4 @@ public:
   // logical geometry, and initialize the amplitude to position calculations
 };
 
-} // namespace Timepix3
+} // namespace timepix3

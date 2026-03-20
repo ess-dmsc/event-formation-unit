@@ -13,7 +13,7 @@
 #include <memory>
 #include <miracles/geometry/MiraclesGeometry.h>
 
-using namespace Caen;
+using namespace caen;
 
 class MiraclesGeometryTest : public TestBase {
 protected:

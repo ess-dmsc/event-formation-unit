@@ -20,7 +20,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-namespace Caen {
+namespace caen {
 
 /// loads calibration from file
 CDCalibration::CDCalibration(const std::string &Name, const std::string &CalibrationFile)
@@ -232,4 +232,4 @@ void CDCalibration::throwException(const std::string &Message) {
   throw std::runtime_error(Message);
 }
 
-} // namespace Caen
+} // namespace caen

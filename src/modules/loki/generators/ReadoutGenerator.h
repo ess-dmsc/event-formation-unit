@@ -14,7 +14,7 @@
 #include <common/testutils/DataFuzzer.h>
 #include <generators/essudpgen/ReadoutGeneratorBase.h>
 
-namespace Caen {
+namespace caen {
 class ReadoutGenerator : public ReadoutGeneratorBase {
 public:
   ReadoutGenerator() : ReadoutGeneratorBase(DetectorType::LOKI) {}
@@ -23,5 +23,5 @@ protected:
   void generateData() override;
 };
 
-} // namespace Caen
+} // namespace caen
 // GCOVR_EXCL_STOP
